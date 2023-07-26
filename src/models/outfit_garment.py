@@ -46,30 +46,6 @@ class OutfitGarment(db.Model):
             raise AssertionError('source  must be between 5 and 60 characters')
 
         return value
-    
-    @validates('outfit_id')
-    def validate_id(self, key, value):
-        if not value:
-            raise AssertionError('No outfit_id')
-        if not re.compile("^[-+]?[0-9]+$", value):
-            raise AssertionError('The value must be an integer')
-        if value <= 0:
-            raise AssertionError('outfit_id invalid')
-        if not Outfit.query.filter_by(id=value).first():  # Verifica si el usuario con el "user_id" especificado existe
-            raise AssertionError('User with the specified outfit_id does not exist')
-        return value
-    
-    @validates('garment_id')
-    def validate_id(self, key, value):
-        if not value:
-            raise AssertionError('No garment_id')
-        if not re.compile("^[-+]?[0-9]+$", value):
-            raise AssertionError('The value must be an integer')
-        if value <= 0:
-            raise AssertionError('garment_id invalid')
-        if not Garment.query.filter_by(id=value).first():  # Verifica si el usuario con el "user_id" especificado existe
-            raise AssertionError('User with the specified garment_id does not exist')
-        return value
 
 class OutfitGarmentSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -77,9 +53,6 @@ class OutfitGarmentSchema(ma.SQLAlchemyAutoSchema):
         model = OutfitGarment
         include_fk = True
 
-user_schema = OutfitGarment()
-users_schema = OutfitGarment(many=True)
+outfit_garment_schema = OutfitGarmentSchema()
+outfits_garments_schema = OutfitGarmentSchema(many=True)
 
-#Posible solución a la importación ciclica 
-from src.models.outfit import Outfit
-from src.models.garment import Garment

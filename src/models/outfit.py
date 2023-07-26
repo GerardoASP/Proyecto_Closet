@@ -1,6 +1,7 @@
-#version 1.2
+#version 1.3
 
 #Importación de Librerias
+from wsgiref.validate import validator
 from src.database import db, ma
 from src.models.outfit_garment import OutfitGarment
 from src.enums import DailyRecommendation
@@ -13,8 +14,8 @@ class Outfit(db.Model):
     id = db.Column(db.Integer,primary_key=True)
     occasion = db.Column(db.String(60),nullable=False)
     user_id = db.Column(db.Integer,db.ForeignKey('user.id',onupdate="CASCADE",ondelete="RESTRICT"),nullable=False)
-    daily_recommendation = db.Column(db.Enum(DailyRecommendation),nullable=False,default=DailyRecommendation.CASUAL)
-    outfit_garments_o = db.relationship('OutfitGarment', backref="owner")
+    daily_recommendation = db.Column(db.Enum,nullable=False,default=DailyRecommendation.CASUAL)
+    outfits_garments = db.relationship('OutfitGarment', backref="outfits")
     created_at = db.Column(db.DateTime, default=datetime.now())
     updated_at = db.Column(db.DateTime, onupdate=datetime.now())
     
@@ -60,16 +61,15 @@ class Outfit(db.Model):
         return value
     
     @validates('user_id')
-    def validate_id(self, key, value):
+    def validate_user_id(self, key, value):
         if not value:
-            raise AssertionError('No user_id')
+            raise AssertionError('No user_id provided')
         if not re.compile("^[-+]?[0-9]+$", value):
             raise AssertionError('The value must be an integer')
         if value <= 0:
             raise AssertionError('user_id invalid')
-        if not User.query.filter_by(id=value).first():  # Verifica si el usuario con el "user_id" especificado existe
-            raise AssertionError('User with the specified user_id does not exist')
         return value
+
     
 class OutfitSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -77,8 +77,11 @@ class OutfitSchema(ma.SQLAlchemyAutoSchema):
         model = Outfit
         include_fk = True
 
-user_schema = OutfitSchema()
-users_schema = OutfitSchema(many=True)
+outfit_schema = OutfitSchema()
+outfits_schema = OutfitSchema(many=True)
 
-#Posible solución a la importación ciclica 
-from src.models.user import User
+
+#Problema:Error creating backref 'owner' on relationship 'Outfit.outfits_garments': 
+# property of that name exists on mapper 'Mapper[OutfitGarment(outfit_garment)]'
+# Solución:outfits_garments = db.relationship('OutfitGarment', backref="owner")-> outfits_garments = db.relationship('OutfitGarment', backref="outfits")
+# URL:https://www.digitalocean.com/community/tutorials/how-to-use-many-to-many-database-relationships-with-flask-sqlalchemy
