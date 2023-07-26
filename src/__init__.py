@@ -1,10 +1,11 @@
-#Version 1.0
+#Version 1.1
 from flask import Flask
 from os import environ
 from src.endpoints.users import users
 from src.endpoints.outfits import outfits
 from src.endpoints.garments import garments
 from src.endpoints.outfits_garments import outfits_garments
+from src.database import db,ma,migrate
 
 def create_app():
     app = Flask(__name__,instance_relative_config=True)
@@ -26,4 +27,9 @@ def create_app():
     app.register_blueprint(outfits)
     app.register_blueprint(garments)
     app.register_blueprint(outfits_garments)
+    
+    db.init_app(app)
+    ma.init_app(app)
+    migrate.init_app(app, db)
+    
     return app
