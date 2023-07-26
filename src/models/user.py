@@ -9,6 +9,7 @@ from datetime import date,datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy.orm import validates
 import re
+
 #Creación de Modelos
 class User(db.Model):
     id = db.Column(db.Integer,primary_key=True)
@@ -16,7 +17,7 @@ class User(db.Model):
     password = db.Column(db.String(128),nullable=False) #Cambiar la cantidad de caracteres de la contraseña
     email = db.Column(db.String(60),unique=True,nullable=False)
     date_birth = db.Column(db.Date,nullable=False)
-    type_document = db.Column(db.Enum(TypeDocument),nullable=False,default=TypeDocument.cedula)
+    type_document = db.Column(db.Enum,nullable=False,default=TypeDocument.cedula)
     garments = db.relationship('Garment', backref="owner")
     outfits = db.relationship('Outfit', backref="owner")
     created_at = db.Column(db.DateTime, default=datetime.now())
@@ -95,8 +96,8 @@ class User(db.Model):
         if not re.match("[0-9]{1,2}\\-[0-9]{1,2}\\-[0-9]{4}", value):
             raise AssertionError('Provided date is not a real date value')
         today = datetime.datetime.now()
-        dateBirth = datetime.datetime.strptime(value, "%Y-%m-%d")
-        if not dateBirth < today:
+        date_birth = datetime.datetime.strptime(value, "%Y-%m-%d")
+        if not date_birth < today:
             raise AssertionError('date birth invalid')
         return value
     

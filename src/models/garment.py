@@ -15,7 +15,7 @@ class Garment(db.Model):
     colour = db.Column(db.String(30),nullable=False)
     size = db.Column(db.String(3),nullable=False)
     user_id = db.Column(db.Integer,db.ForeignKey('user.id',onupdate="CASCADE",ondelete="RESTRICT"),nullable=False)
-    outfit_garments_g = db.relationship('OutfitGarment', backref="owner")
+    outfits_garments_g = (db.relationship('OutfitGarment', backref="garments"))
     created_at = db.Column(db.DateTime, default=datetime.now())
     updated_at = db.Column(db.DateTime, onupdate=datetime.now())
     
@@ -74,26 +74,19 @@ class Garment(db.Model):
 
         return value
     
-    @validates('user_id')
-    def validate_id(self, key, value):
-        if not value:
-            raise AssertionError('No user_id')
-        if not re.compile("^[-+]?[0-9]+$", value):
-            raise AssertionError('The value must be an integer')
-        if value <= 0:
-            raise AssertionError('user_id invalid')
-        if not User.query.filter_by(id=value).first():  # Verifica si el usuario con el "user_id" especificado existe
-            raise AssertionError('User with the specified user_id does not exist')
-        return value
-    
 class GarmentSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         #fields
         model = Garment
         include_fk = True
 
-user_schema = GarmentSchema()
-users_schema = GarmentSchema(many=True)
+garment_schema = GarmentSchema()
+garments_schema = GarmentSchema(many=True)
 
-#Posible solución a la importación ciclica 
-from src.models.user import User
+#Posible solución a la importación ciclica (No Funciona)
+#from src.models.user import User
+
+#Problema:Error creating backref 'owner' on relationship 'Outfit.outfits_garments': 
+# property of that name exists on mapper 'Mapper[OutfitGarment(outfit_garment)]'
+# Solución:outfits_garments_g = (db.relationship('OutfitGarment', backref="owner"))-> outfits_garments_g = (db.relationship('OutfitGarment', backref="garments"))
+# URL:https://www.digitalocean.com/community/tutorials/how-to-use-many-to-many-database-relationships-with-flask-sqlalchemy
