@@ -1,4 +1,4 @@
-#version 1.2
+#version 1.4
 
 #Importacion de Librerias
 from src.database import db, ma
@@ -17,7 +17,7 @@ class User(db.Model):
     password = db.Column(db.String(128),nullable=False) #Cambiar la cantidad de caracteres de la contraseña
     email = db.Column(db.String(60),unique=True,nullable=False)
     date_birth = db.Column(db.Date,nullable=False)
-    type_document = db.Column(db.Enum,nullable=False,default=TypeDocument.cedula)
+    type_document = db.Column(db.String(3),nullable=False)
     garments = db.relationship('Garment', backref="owner")
     outfits = db.relationship('Outfit', backref="owner")
     created_at = db.Column(db.DateTime, default=datetime.now())
@@ -103,9 +103,7 @@ class User(db.Model):
     
     @validates('type_document')
     def validate_rol_user(self, key, value):
-        allowed_values = ["c.c", "t.i", "c.e"]
-        if not value:
-            raise AssertionError('No type_document')
+        allowed_values = [enum_value.value for enum_value in TypeDocument]
         if value not in allowed_values:
             raise ValueError('El valor del campo "type_document" no es válido. Los valores permitidos son c.c, t.i y c.e')
         return value
