@@ -1,12 +1,12 @@
-#version 1.1
-from sqlalchemy import Enum
+#version 1.4
 
-class TypeDocument(Enum):
-    cedula = 'c.c'
-    tarjeta_identidad = 't.i'
-    cedula_extranjeria = 'c.e'
+import enum
+class TypeDocument(enum.Enum):
+    cedula = "c.c"
+    tarjeta_identidad = "t.i"
+    cedula_extranjeria = "c.e"
 
-class DailyRecommendation(Enum):
+class DailyRecommendation(enum.Enum):
     CASUAL = 'Casual'
     FORMAL = 'Formal'
     DEPORTIVO = 'Deportivo'
