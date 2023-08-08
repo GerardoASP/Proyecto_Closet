@@ -1,4 +1,4 @@
-#version 1.2
+#version 1.6
 
 #Importación de Librerias
 from src.database import db, ma
@@ -72,6 +72,20 @@ class Garment(db.Model):
         if len(value) >= 3:
             raise AssertionError('size  must be 3 or less characters')
 
+        return value
+    
+    @validates('user_id')
+    def validate_user_id(self, key, value):
+        #Solución al problema de la importación ciclica
+        #Importación Tardía
+        from src.models.user import User
+        user = User.query.filter_by(id=int(value)).first()
+        if not value:
+            raise AssertionError('No user_id provided')
+        if value <= 0:
+            raise AssertionError('user_id invalid')
+        if user is None:
+            raise AssertionError('user_id does not exist in the users table')
         return value
     
 class GarmentSchema(ma.SQLAlchemyAutoSchema):
